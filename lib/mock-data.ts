@@ -505,6 +505,49 @@ export function getMockReport(contractId: string) {
   return readWorkspace().reports[contractId] ?? null;
 }
 
+export function updateMockSuggestionDecision(
+  contractId: string,
+  suggestionId: string,
+  accepted: boolean | null,
+) {
+  let nextReport: ReportData | null = null;
+
+  updateWorkspace((workspace) => {
+    const currentReport = workspace.reports[contractId];
+    if (!currentReport) {
+      nextReport = null;
+      return workspace;
+    }
+
+    const updatedReport: ReportData = {
+      ...currentReport,
+      risks: currentReport.risks.map((risk) => ({
+        ...risk,
+        suggestions: risk.suggestions?.map((suggestion) =>
+          suggestion.id === suggestionId
+            ? {
+                ...suggestion,
+                accepted,
+              }
+            : suggestion
+        ) ?? null,
+      })),
+    };
+
+    nextReport = updatedReport;
+
+    return {
+      ...workspace,
+      reports: {
+        ...workspace.reports,
+        [contractId]: updatedReport,
+      },
+    };
+  });
+
+  return nextReport;
+}
+
 export function deleteMockContract(contractId: string) {
   updateWorkspace((workspace) => ({
     ...workspace,

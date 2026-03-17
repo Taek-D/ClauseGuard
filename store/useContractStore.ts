@@ -20,6 +20,7 @@ interface ContractState {
   total: number;
   is_loading: boolean;
   is_uploading: boolean;
+  is_review_saving: boolean;
   initialized: boolean;
   error: string | null;
   initialize: () => Promise<void>;
@@ -30,6 +31,11 @@ interface ContractState {
   upload_contract: (input: UploadContractInput) => Promise<Contract | null>;
   delete_contract: (contractId: string) => Promise<boolean>;
   advance_analysis: (contractId: string) => Promise<Analysis | null>;
+  update_suggestion_decision: (
+    contractId: string,
+    suggestionId: string,
+    accepted: boolean | null,
+  ) => Promise<boolean>;
   set_filters: (filters: Partial<ContractFilters>) => void;
   clear_selection: () => void;
   clear_error: () => void;
@@ -49,6 +55,7 @@ export const useContractStore = create<ContractState>((set, get) => ({
   total: 0,
   is_loading: false,
   is_uploading: false,
+  is_review_saving: false,
   initialized: false,
   error: null,
 
@@ -75,7 +82,7 @@ export const useContractStore = create<ContractState>((set, get) => ({
 
     set({
       is_loading: false,
-      error: response.error?.message ?? "계약서 목록을 불러오지 못했습니다.",
+      error: response.error?.message ?? "The contract list could not be loaded.",
     });
   },
 
@@ -95,7 +102,7 @@ export const useContractStore = create<ContractState>((set, get) => ({
     set({
       selected_contract: null,
       is_loading: false,
-      error: response.error?.message ?? "계약서를 불러오지 못했습니다.",
+      error: response.error?.message ?? "The contract could not be loaded.",
     });
     return null;
   },
@@ -114,7 +121,7 @@ export const useContractStore = create<ContractState>((set, get) => ({
 
     set({
       selected_analysis: null,
-      error: response.error?.message ?? "분석 상태를 불러오지 못했습니다.",
+      error: response.error?.message ?? "The analysis status could not be loaded.",
     });
     return null;
   },
@@ -135,7 +142,7 @@ export const useContractStore = create<ContractState>((set, get) => ({
 
     set({
       selected_report: null,
-      error: response.error?.message ?? "리포트를 불러오지 못했습니다.",
+      error: response.error?.message ?? "The report could not be loaded.",
     });
     return null;
   },
@@ -156,7 +163,7 @@ export const useContractStore = create<ContractState>((set, get) => ({
 
     set({
       is_uploading: false,
-      error: response.error?.message ?? "계약서 업로드에 실패했습니다.",
+      error: response.error?.message ?? "The contract upload failed.",
     });
     return null;
   },
@@ -198,7 +205,7 @@ export const useContractStore = create<ContractState>((set, get) => ({
                   ...contract,
                   status: analysis.status === "parsing" ? "parsing" : "analyzing",
                 }
-              : contract,
+              : contract
           ),
         }));
       }
@@ -207,9 +214,31 @@ export const useContractStore = create<ContractState>((set, get) => ({
     }
 
     set({
-      error: response.error?.message ?? "분석 진행 상태를 갱신하지 못했습니다.",
+      error: response.error?.message ?? "The analysis status could not be refreshed.",
     });
     return null;
+  },
+
+  update_suggestion_decision: async (contractId, suggestionId, accepted) => {
+    set({ is_review_saving: true, error: null });
+    const response = await reportsApi.updateSuggestionDecision(contractId, suggestionId, accepted);
+
+    if (response.data) {
+      const report = response.data;
+      set((state) => ({
+        selected_report: report,
+        selected_contract:
+          state.selected_contract?.id === contractId ? report.contract : state.selected_contract,
+        is_review_saving: false,
+      }));
+      return true;
+    }
+
+    set({
+      is_review_saving: false,
+      error: response.error?.message ?? "The suggestion decision could not be saved.",
+    });
+    return false;
   },
 
   set_filters: (filters) => {
