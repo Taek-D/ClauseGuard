@@ -84,8 +84,8 @@ jobs:
 
       - name: Install Deno
         run: |
-          curl -fsSL https://deno.land/install.sh | sh -s -- -v 2.7.5
-          echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
+          npm install -g deno@2.7.5
+          deno --version
 
       - name: Run shared Deno tests
         run: npm run deno:test
@@ -109,8 +109,8 @@ jobs:
 
       - name: Install Deno
         run: |
-          curl -fsSL https://deno.land/install.sh | sh -s -- -v 2.7.5
-          echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
+          npm install -g deno@2.7.5
+          deno --version
 
       - name: Run Deno type checks
         run: npm run deno:check
