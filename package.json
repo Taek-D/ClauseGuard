@@ -1,0 +1,33 @@
+{
+  "name": "clauseguard",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "deno:test": "node scripts/run-deno.mjs test supabase/functions/_shared/*.test.ts",
+    "deno:check": "node scripts/run-deno.mjs check supabase/functions/contracts/index.ts && node scripts/run-deno.mjs check supabase/functions/analysis/index.ts && node scripts/run-deno.mjs check supabase/functions/reports/index.ts"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "latest",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "next": "16.1.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "tailwind-merge": "latest",
+    "zustand": "latest"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "@tailwindcss/postcss": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "@types/react-dom": "latest",
+    "postcss": "latest",
+    "tailwindcss": "4.2.1",
+    "typescript": "latest"
+  }
+}
