@@ -17,10 +17,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -38,10 +38,10 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: npm
@@ -72,17 +72,20 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.7.5
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Deno
+        run: |
+          curl -fsSL https://deno.land/install.sh | sh -s -- -v 2.7.5
+          echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
 
       - name: Run shared Deno tests
         run: npm run deno:test
@@ -94,17 +97,20 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 20
 
-      - name: Set up Deno
-        uses: denoland/setup-deno@v2
-        with:
-          deno-version: v2.7.5
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Deno
+        run: |
+          curl -fsSL https://deno.land/install.sh | sh -s -- -v 2.7.5
+          echo "$HOME/.deno/bin" >> "$GITHUB_PATH"
 
       - name: Run Deno type checks
         run: npm run deno:check
