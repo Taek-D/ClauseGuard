@@ -13,6 +13,7 @@ import {
   getMockUser,
   listMockContracts,
   setMockUser,
+  updateMockSuggestionDecision,
   uploadMockContract,
 } from "@/lib/mock-data";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
@@ -234,7 +235,7 @@ export const authApi = {
 
   async signInWithGoogle(): Promise<ApiResult<AppUser | null>> {
     if (!isSupabaseConfigured) {
-      return { data: null };
+      return { data: enterMockWorkspace("founder@gmail.com") };
     }
 
     try {
@@ -264,9 +265,7 @@ export const authApi = {
         };
       }
 
-      return {
-        data: enterMockWorkspace("founder@gmail.com"),
-      };
+      return { data: null };
     } catch (error) {
       return {
         error: toApiError(error, "Google 로그인에 실패했습니다."),
@@ -439,5 +438,30 @@ export const reportsApi = {
 
     const response = await requestFunction<ReportData>(`/reports/${contractId}`);
     return response.data ? { data: response.data.data } : { error: response.error };
+  },
+
+  async updateSuggestionDecision(
+    contractId: string,
+    suggestionId: string,
+    accepted: boolean | null,
+  ): Promise<ApiResult<ReportData>> {
+    if (!isSupabaseConfigured) {
+      const report = updateMockSuggestionDecision(contractId, suggestionId, accepted);
+      return report
+        ? { data: report }
+        : {
+            error: {
+              code: "NOT_FOUND",
+              message: "The report or suggestion could not be found.",
+            },
+          };
+    }
+
+    return {
+      error: {
+        code: "NOT_IMPLEMENTED",
+        message: "Suggestion review actions are only available in mock mode right now.",
+      },
+    };
   },
 };

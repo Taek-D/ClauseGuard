@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-import type { Contract, Severity } from "@/types";
+import type { Contract, ReportData, Severity } from "@/types";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -61,4 +61,29 @@ export function getSeverityWeight(severity: Severity): number {
 
 export function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+export function getSuggestionDecisionLabel(accepted: boolean | null): string {
+  if (accepted === true) return "Accepted";
+  if (accepted === false) return "Needs review";
+  return "Pending";
+}
+
+export function buildReportClipboardText(report: ReportData): string {
+  const topRisks = report.risks.slice(0, 3).map((risk, index) => {
+    const suggestion = risk.suggestions?.[0];
+    const decision = suggestion ? getSuggestionDecisionLabel(suggestion.accepted) : "No suggestion";
+    return `${index + 1}. [${risk.severity.toUpperCase()}] ${risk.title} (${decision})`;
+  });
+
+  return [
+    "ClauseGuard Risk Report",
+    `Contract: ${report.contract.file_name}`,
+    `Generated: ${formatDate(report.contract.created_at)}`,
+    `Overall score: ${formatScore(report.summary.overall_score)}`,
+    `High: ${report.summary.high_count} | Medium: ${report.summary.medium_count} | Low: ${report.summary.low_count}`,
+    "",
+    "Top risks",
+    ...(topRisks.length ? topRisks : ["- No risks found"]),
+  ].join("\n");
 }
